@@ -45,7 +45,7 @@ def identify_face(image_path):
 # 예시 사용법
 if __name__ == "__main__":
     # 얼굴 등록
-    register_face("image copy.png", "조아름")
+    register_face("image/김승아.jpeg", "조아름")
 
     # 등록된 사람인지 확인
-    identify_face("image copy.png")
+    identify_face("image/김승아.jpeg")

@@ -1,14 +1,14 @@
 from sqlalchemy.orm import Session
-from . import models, schemas
-import json
+import models
 
-def create_face_data(db: Session, name: str, encoding: list):
-    encoding_json = json.dumps(encoding)  # JSON Çü½ÄÀ¸·Î º¯È¯
-    face_data = models.FaceData(name=name, encoding=encoding_json)
-    db.add(face_data)
+# ë°©ë¬¸ì ìƒì„± (DBì— ì €ì¥)
+def create_visitor(db: Session, name: str, photo: bytes):
+    db_visitor = models.Visitor(name=name, photo=photo)
+    db.add(db_visitor)
     db.commit()
-    db.refresh(face_data)
-    return face_data
+    db.refresh(db_visitor)
+    return db_visitor
 
-def get_all_faces(db: Session):
-    return db.query(models.FaceData).all()
+# ëª¨ë“  ë°©ë¬¸ì ê°€ì ¸ì˜¤ê¸°
+def get_visitors(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Visitor).offset(skip).limit(limit).all()
