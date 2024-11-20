@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 
 DATABASE_URL = "mysql+pymysql://root:0908@localhost:3306/iot"
+
 # SQLAlchemy Base
 Base = declarative_base()
 
@@ -21,8 +22,8 @@ class Visitor(Base):
     name = Column(String(255))
     photo = Column(BLOB)  # 사진을 BLOB 형식으로 저장
     visit_date = Column(DateTime, default=datetime.utcnow)  # 방문 날짜
-    
-# 데이터베이스 생성
+
+# 데이터베이스 테이블 생성
 Base.metadata.create_all(bind=engine)
 
 # 세션을 가져오는 함수
@@ -32,3 +33,5 @@ def get_db():
         yield db
     finally:
         db.close()
+
+        

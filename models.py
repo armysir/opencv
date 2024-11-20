@@ -4,13 +4,15 @@ from datetime import datetime
 
 Base = declarative_base()
 
+from sqlalchemy import Column, Integer, String, BLOB, DateTime
+
 class Visitor(Base):
     __tablename__ = 'visitors'
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    photo_path = Column(String)  # 사진 파일 경로
-    visit_time = Column(DateTime, default=datetime.utcnow)  # 방문 시간
+    photo = Column(BLOB)  # BLOB 또는 LONGBLOB로 설정
+    visit_date = Column(DateTime)
 
     def __repr__(self):
         return f"<Visitor(name={self.name}, visit_time={self.visit_time})>"
