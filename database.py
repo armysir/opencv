@@ -23,6 +23,17 @@ class Visitor(Base):
     photo = Column(BLOB)  # 사진을 BLOB 형식으로 저장
     visit_date = Column(DateTime, default=datetime.utcnow)  # 방문 날짜
 
+
+# 방명록 모델 정의
+class Guestbook(Base):
+    __tablename__ = 'guestbook'
+
+    id = Column(Integer, primary_key=True, index=True)
+    visitor_name = Column(String(255), index=True)
+    visit_date = Column(DateTime, default=datetime.utcnow)
+    photo = Column(BLOB)  # 방문자의 얼굴 사진을 저장
+
+
 # 데이터베이스 테이블 생성
 Base.metadata.create_all(bind=engine)
 
@@ -33,5 +44,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-        

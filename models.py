@@ -16,3 +16,12 @@ class Visitor(Base):
 
     def __repr__(self):
         return f"<Visitor(name={self.name}, visit_time={self.visit_time})>"
+    
+
+class Guestbook(Base):
+    __tablename__ = "guestbook"
+
+    id = Column(Integer, primary_key=True, index=True)
+    visitor_name = Column(String, index=True)
+    visit_date = Column(DateTime)
+    photo = Column(BLOB)  # 방문자의 사진을 저장
