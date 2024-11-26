@@ -11,7 +11,8 @@ from fastapi.responses import StreamingResponse
 import asyncio
 import cv2
 import numpy as np
-
+import base64
+from fastapi.responses import JSONResponse
 stream_queue = asyncio.Queue()
 
 
@@ -86,6 +87,21 @@ async def upload_frame(file: UploadFile = File(...)):
 async def stream_video():
     # 스트리밍 응답 생성
     return StreamingResponse(generate_stream(), media_type="multipart/x-mixed-replace; boundary=frame")
+
+@app.get("/list")
+async def database_list(db: Session = Depends(get_db)):
+    guestbook_entries = db.query(Guestbook).all()
+    results = [
+        {
+            "id": entry.id,
+            "visitor_name": entry.visitor_name,
+            "photo": base64.b64encode(entry.photo).decode("utf-8") if entry.photo else None,
+            "visit_date": entry.visit_date.isoformat() if entry.visit_date else None,
+        }
+        for entry in guestbook_entries
+    ]
+    return JSONResponse(content={"guestbook_entries": results})
+     
 
     
 @app.post("/register-face/")
