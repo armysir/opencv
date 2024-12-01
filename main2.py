@@ -13,6 +13,11 @@ import cv2
 import numpy as np
 import base64
 from fastapi.responses import JSONResponse
+from firebase_admin import credentials, messaging, initialize_app
+# Firebase Admin SDK 초기화
+cred = credentials.Certificate("auth.json")  # Firebase 서비스 계정 키 경로
+initialize_app(cred)
+
 stream_queue = asyncio.Queue()
 
 
@@ -147,14 +152,16 @@ async def identify_face_api(file: UploadFile = File(...), db: Session = Depends(
     
     if not unknown_face_encodings:
         with open(temp_file_path, "rb") as img_file:
-                    photo = img_file.read()
-        new_guest = Guestbook(visitor_name="알수없는 방문자", photo=photo)
+            photo = img_file.read()
+        new_guest = Guestbook(visitor_name="알 수 없는 방문자", photo=photo)
         db.add(new_guest)
         db.commit()
         db.refresh(new_guest)
         os.remove(temp_file_path)
-        
-        
+
+        # 푸시 알림 전송
+        send_push_notification("알 수 없는 방문자", "새로운 방문자가 확인되었습니다.")
+
         print("등록되지 않은 사람")
         return {"message": "사진에서 얼굴을 인식할 수 없습니다."}
 
@@ -176,20 +183,42 @@ async def identify_face_api(file: UploadFile = File(...), db: Session = Depends(
                 db.commit()
                 db.refresh(new_guest)
 
+                # 푸시 알림 전송
+                send_push_notification(name, f"{name}님이 방문하셨습니다.")
+
                 os.remove(temp_file_path)
-                print("등록된사람")
+                print("등록된 사람")
                 return {"message": f"이 사람은 등록된 사람입니다: {name}"}
+    
     with open(temp_file_path, "rb") as img_file:
-                    photo = img_file.read()
-    new_guest= Guestbook(visitor_name="알수없는 방문자",photo=photo)
+        photo = img_file.read()
+    new_guest = Guestbook(visitor_name="알 수 없는 방문자", photo=photo)
     db.add(new_guest)
     db.commit()
     db.refresh(new_guest)
+
+    # 푸시 알림 전송
+    send_push_notification("알 수 없는 방문자", "새로운 방문자가 확인되었습니다.")
+
     os.remove(temp_file_path)
     print("등록되지 않은 사람")
-
     return {"message": "등록되지 않은 얼굴입니다."}
 
+# Firebase 푸시 알림 함수
+def send_push_notification(title: str, body: str):
+    """푸시 알림을 보내는 함수"""
+    try:
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title=title,
+                body=body,
+            ),
+            topic="general",  # 알림을 보낼 대상 토픽
+        )
+        response = messaging.send(message)
+        print(f"푸시 알림 전송 성공: {response}")
+    except Exception as e:
+        logger.error(f"푸시 알림 전송 실패: {e}")
 
 if __name__ == "__main__":
     import uvicorn
